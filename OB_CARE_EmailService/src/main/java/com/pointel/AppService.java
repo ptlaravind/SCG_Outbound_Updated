@@ -25,7 +25,9 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mypurecloud.sdk.v2.ApiClient;
 import com.mypurecloud.sdk.v2.ApiException;
+import com.mypurecloud.sdk.v2.Configuration;
 import com.mypurecloud.sdk.v2.PureCloudRegionHosts;
 import com.mypurecloud.sdk.v2.api.OutboundApi;
 import com.mypurecloud.sdk.v2.model.CampaignEntityListing;
@@ -45,10 +47,17 @@ public class AppService {
 	public static String email = "";
 	public static String password = "";
 	public static String secretKey = "";
+	public static String clientId = "";
+	public static String clientSecret = "";
+
 
 	AppService() {
+		PureCloudRegionHosts region = setRegion(System.getenv("genesysregion"));
+		ApiClient apiClient = ApiClient.Builder.standard().withBasePath(region).build();
 		try {
 			getSecretCredentials();
+			apiClient.authorizeClientCredentials(clientId, clientSecret);
+			Configuration.setDefaultApiClient(apiClient);
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}
@@ -70,6 +79,8 @@ public class AppService {
 			email = secretJson.get("email").asText();
 			password = secretJson.get("password").asText();
 			secretKey = secretJson.get("SecretKey").asText();
+			clientId = secretJson.get("clientId").asText();
+			clientSecret = secretJson.get("clientSecret").asText();
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}
